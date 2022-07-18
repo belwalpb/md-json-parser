@@ -17,7 +17,7 @@ The package is a Fully featured, extentible markdown to JSON and HTML Parser, us
 
 ## Installation
 
-This package is [ESM only][esm]. It can be installed via NPM:
+This package is [ESM Only](https://gist.github.com/sindresorhus/a39789f98801d908bbc7ff3ecc99d99c). It can be installed via NPM:
 ```sh
 npm install md-json-parser
 ```
@@ -42,7 +42,8 @@ const {data, htmlBody} = await parseMarkdownAsHtml(markdown, {});
 
 <details>
 <summary>Show Output:</summary>
-```js
+
+```json
 {
     "data": {
         "file": "abc.txt",
@@ -51,6 +52,7 @@ const {data, htmlBody} = await parseMarkdownAsHtml(markdown, {});
     "htmlBody": "<h1 id=\"user-content-heading-1\">Heading-1</h1>\n<h2 id=\"user-content-heading-2\">Heading-2</h2>"
 }
 ```
+
 </details>
 
 ### Markdown to JSON Parser:
@@ -70,7 +72,8 @@ const {data, htmlBody} = await parseMarkdownAsJson(markdown, {});
 
 <details>
 <summary>Show Output:</summary>
-```js
+
+```json
 {
     "data": {
         "file": "abc.txt",
@@ -144,6 +147,7 @@ const {data, htmlBody} = await parseMarkdownAsJson(markdown, {});
     }
 }
 ```
+
 </details>
 
 ### Markdown Options:
