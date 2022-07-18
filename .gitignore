@@ -1,0 +1,18 @@
+# Dependency directories
+node_modules/
+
+# Build directory
+lib/
+dist/
+package/
+
+# Logs
+*.log
+npm-debug.log*
+
+#macOS custom attributes
+.DS_Store
+*/.DS_Store
+
+#editor configs
+.vscode
