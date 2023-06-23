@@ -1,11 +1,9 @@
-// import { join } from 'path'
-// import fs from 'fs'
-import type { H } from 'mdast-util-to-hast'
-import { all } from 'mdast-util-to-hast'
-import { encode } from 'mdurl'
-import type { MdastNode } from 'mdast-util-to-hast/lib'
+import type { H } from 'mdast-util-to-hast';
+import { all } from 'mdast-util-to-hast';
+import { encode } from '../../utils';
+import type { MdastContent } from 'mdast-util-to-hast/lib';
 
-type Node = MdastNode & {
+type Node = MdastContent & {
     title: string;
     url: string;
     attributes?: any;
@@ -13,15 +11,15 @@ type Node = MdastNode & {
     children?: Node[];
 };
 
-export default function link (h: H, node: Node) {
-  const props: any = {
-    ...((node.attributes || {}) as object),
-    href: encode(node.url)
-  }
+export default function link(h: H, node: Node) {
+    const props: any = {
+        ...((node.attributes || {}) as object),
+        href: encode(node.url),
+    };
 
-  if (node.title !== null && node.title !== undefined) {
-    props.title = node.title
-  }
+    if (node.title !== null && node.title !== undefined) {
+        props.title = node.title;
+    }
 
-  return h(node, 'a', props, all(h, node))
+    return h(node, 'a', props, all(h, node));
 }

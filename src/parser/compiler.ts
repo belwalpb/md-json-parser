@@ -1,4 +1,6 @@
-import type { MarkdownRoot, MarkdownNode, MarkdownOptions, Node as UnistNode } from '../types'
+import { Node as UnistNode } from 'unist';
+import type { MarkdownRoot, MarkdownNode, MarkdownOptions } from '../types';
+import { isSafeAttribute } from '../utils/attrs';
 
 type Node = UnistNode & {
     tagName?: string;
@@ -10,121 +12,125 @@ type Node = UnistNode & {
 /**
  * JSON compiler
  */
-export function compiler (this: any, _options: MarkdownOptions) {
-  /**
+export function compiler(this: any, _options: MarkdownOptions) {
+    /**
      * Parses nodes for JSON structure. Attempts to drop
      * unwanted properties.
      */
-  function parseAsJSON (node: Node | Node[]): any {
-    if (Array.isArray(node)) {
-      return node.map(parseAsJSON).filter(Boolean)
-    }
+    function parseAsJSON(node: Node | Node[]): MarkdownNode | MarkdownNode[] | undefined {
+        if (Array.isArray(node)) {
+            return node.map(parseAsJSON).filter(Boolean) as MarkdownNode[];
+        }
 
-    /**
+        // Drop unsafe properties
+        if (node.properties) {
+            node.properties = Object.entries(node.properties).reduce((acc, [key, value]) => {
+                if (isSafeAttribute(key, value)) {
+                    acc[key] = value;
+                }
+                return acc;
+            }, {} as Record<string, any>);
+        }
+
+        // Remove double dashes and trailing dash from heading ids
+        // Insert underscore if id start with a digit
+        if (node.tagName?.startsWith('h') && node.properties.id) {
+            node.properties.id = node.properties.id
+                .replace(/-+/g, '-')
+                .replace(/-$/, '')
+                .replace(/^-/, '')
+                .replace(/^(\d)/, '_$1');
+        }
+
+        /**
          * If Current Element is p and Its Only Child is img then
          * unwrapping img from it to avoid unwated p tags around img
          */
-    if (
-      node.type === 'element' &&
+        if (
+            node.type === 'element' &&
             node.tagName === 'p' &&
             node.children?.length === 1 &&
             node.children[0].tagName === 'img'
-    ) {
-      node = parseAsJSON(node.children[0])
-      return node as MarkdownNode
-    }
+        ) {
+            return parseAsJSON(node.children[0]);
+        }
 
-    /**
-         * Special Handling For Code Elements.
-         */
-    if (node.type === 'element' && node.tagName === 'code') {
-      const { code } = node.properties
-      return <MarkdownNode>{
-        type: 'element',
-        tag: 'code',
-        props: node.properties,
-        children: [
-          {
-            type: 'text',
-            value: code
-          }
-        ]
-      }
-    }
-    /**
+        /**
          * Element node creates an isolated children array to
          * allow nested elements
          */
-    if (node.type === 'element') {
-      if (node.tagName === 'li') {
-        // unwrap unwanted paragraphs around `<li>` children
-        let hasPreviousParagraph = false
-        node.children = node.children?.flatMap((child) => {
-          if (child.tagName === 'p') {
-            if (hasPreviousParagraph) {
-              // Insert line break before new paragraph
-              child.children?.unshift({
-                type: 'element',
-                tagName: 'br',
-                properties: {}
-              })
+        if (node.type === 'element') {
+            switch (node.tagName) {
+                case 'li': {
+                    // unwrap unwanted paragraphs around `<li>` children
+                    let hasPreviousParagraph = false;
+                    node.children = node.children?.flatMap((child) => {
+                        if (child.tagName === 'p') {
+                            if (hasPreviousParagraph) {
+                                // Insert line break before new paragraph
+                                child.children!.unshift({
+                                    type: 'element',
+                                    tagName: 'br',
+                                    properties: {},
+                                });
+                            }
+
+                            hasPreviousParagraph = true;
+                            return child.children;
+                        }
+                        return child;
+                    }) as Node[];
+                    break;
+                }
+                /**
+                 * Rename component slots tags name
+                 */
+                case 'component-slot':
+                    node.tagName = 'template';
+                    break;
             }
 
-            hasPreviousParagraph = true
-            return child.children
-          }
-          return child
-        }) as Node[]
-      }
+            return <MarkdownNode>{
+                type: 'element',
+                tag: node.tagName as string,
+                props: node.properties,
+                children: parseAsJSON(node.children || []),
+            };
+        }
 
-      /**
-             * Rename component slots tags name
-             */
-      if (node.tagName === 'component-slot') {
-        node.tagName = 'template'
-      }
-
-      return <MarkdownNode>{
-        type: 'element',
-        tag: node.tagName as string,
-        props: node.properties,
-        children: parseAsJSON(node.children || [])
-      }
-    }
-
-    /**
+        /**
          * Text node
          */
-    if (node.type === 'text') {
-      // Remove new line nodes
-      if (node.value === '\n') {
-        return null
-      }
-      return <MarkdownNode>{
-        type: 'text',
-        value: node.value as string
-      }
+        if (node.type === 'text') {
+            // Remove new line nodes
+            if (node.value === '\n') {
+                return undefined;
+            }
+            return <MarkdownNode>{
+                type: 'text',
+                value: node.value as string,
+            };
+        }
+
+        // Remove comment nodes from AST tree
+        if (node.type === 'comment') {
+            return undefined;
+        }
+
+        node.children = parseAsJSON(node.children || []) as Node[];
+
+        return node as MarkdownNode;
     }
 
-    // Remove comment nodes from AST tree
-    if (node.type === 'comment') {
-      return null
-    }
-
-    node.children = parseAsJSON(node.children || [])
-
-    return node as MarkdownNode
-  }
-
-  this.Compiler = function (root: Node): MarkdownRoot {
-    /**
+    this.Compiler = function (root: Node): MarkdownRoot {
+        /**
          * We do not use `map` operation, since each node can be expanded to multiple top level
          * nodes. Instead, we need a array to fill in as many elements inside a single
          * iteration
          */
-    return {
-      type: 'root',
-      children: parseAsJSON(root.children || [])
-    }
-  }
+        return {
+            type: 'root',
+            children: parseAsJSON(root.children || []) as MarkdownNode[],
+        };
+    };
 }

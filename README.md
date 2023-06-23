@@ -5,7 +5,6 @@ A markdown parsing library build on the top of [unified](https://www.npmjs.com/p
 ## Feature Highlights
 
 *   [x] **Markdown to JSON Tree Conversion**
-*   [x] **Markdown to HTML Conversion**
 *   [x] **Security by default (no `dangerouslySetInnerHTML` or XSS attacks)**   
 *   [x] **Fully Extentible (Using Remark and Rehype Plugins)**
 *   [x] **Frontmatter Support**
@@ -13,7 +12,7 @@ A markdown parsing library build on the top of [unified](https://www.npmjs.com/p
 
 ## What is Markdown Parser?
 
-The package is a Fully featured, extentible markdown to JSON and HTML Parser, using Syntax Trees. In the input, a markdown string can be given to it with optional plugins and extentions.
+The package is a Fully featured, extentible markdown to JSON Parser, using Syntax Trees. In the input, a markdown string can be given to it with optional plugins and extentions.
 
 ## Installation
 
@@ -24,36 +23,6 @@ npm install md-json-parser
 
 ## Usage
 The Package can be imported like:
-
-### Markdown to HTML Parser:
-```js
-import { parseMarkdownAsHtml } from 'md-json-parser'
-
-let markdown = `---
-file: abc.txt
-creationDate: 2022-02-12
----
-  
-# Heading-1
-## Heading-2`
-
-const {data, htmlBody} = await parseMarkdownAsHtml(markdown, {});
-```
-
-<details>
-<summary>Show Output:</summary>
-
-```json
-{
-    "data": {
-        "file": "abc.txt",
-        "creationDate": "2022-02-12T00:00:00.000Z"
-    },
-    "htmlBody": "<h1 id=\"user-content-heading-1\">Heading-1</h1>\n<h2 id=\"user-content-heading-2\">Heading-2</h2>"
-}
-```
-
-</details>
 
 ### Markdown to JSON Parser:
 ```js

@@ -1,19 +1,24 @@
-import type { H } from 'mdast-util-to-hast'
-import { kebabCase } from 'scule'
-import { u } from 'unist-builder'
-import { getTagName } from './utils'
+import type { H } from 'mdast-util-to-hast';
+import { kebabCase } from 'scule';
+import { u } from 'unist-builder';
+import type { MdastContent } from 'mdast-util-to-hast/lib';
+import { getTagName } from './utils';
 
-export default function html (h: H, node: any) {
-  const tagName = getTagName(node.value)
+type Node = MdastContent & {
+    value: string;
+};
 
-  if (tagName && /[A-Z]/.test(tagName)) {
-    node.value = node.value.replace(tagName, kebabCase(tagName))
-  }
+export default function html(h: H, node: Node) {
+    const tagName = getTagName(node.value);
 
-  // Html `<code>` tags should parse and render as inline code
-  if (tagName === 'code') {
-    node.value = node.value.replace(tagName, 'code-inline')
-  }
+    if (tagName && /[A-Z]/.test(tagName)) {
+        node.value = node.value.replace(tagName, kebabCase(tagName));
+    }
 
-  return h.dangerous ? h.augment(node, u('raw', node.value)) : null
+    // Html `<code>` tags should parse and render as inline code
+    if (tagName === 'code') {
+        node.value = node.value.replace(tagName, 'code-inline');
+    }
+
+    return h.dangerous ? h.augment(node, u('raw', node.value)) : null;
 }

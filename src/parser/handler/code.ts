@@ -1,21 +1,31 @@
-import type { H } from 'mdast-util-to-hast'
-import { tabsReplacer } from '../../utils'
-import { parseThematicBlock } from './utils'
+import type { H } from 'mdast-util-to-hast';
+import { u } from 'unist-builder';
+import type { MdastContent } from 'mdast-util-to-hast/lib';
+import { parseThematicBlock } from './utils';
+import { tabsReplacer } from '../../utils';
 
-export default (h: H, node: any) => {
-  const lang = (node.lang || '') + ' ' + (node.meta || '')
-  const { language, highlights, filename } = parseThematicBlock(lang)
-  const code = node.value ? tabsReplacer(node.value + '\n') : ''
+type Node = MdastContent & {
+    lang: string;
+    meta: string;
+    value: string;
+};
 
-  return h(
-    node.position,
-    'code',
-    {
-      language,
-      filename,
-      highlights,
-      code
-    },
-    []
-  )
-}
+export default (h: H, node: Node) => {
+    const lang = (node.lang || '') + ' ' + (node.meta || '');
+    const { language, highlights, filename, meta } = parseThematicBlock(lang);
+    const code = node.value ? tabsReplacer(node.value + '\n') : '';
+
+    return h(
+        node.position,
+        'code',
+        {
+            language,
+            filename,
+            highlights,
+            meta,
+            code,
+            className: [`language-${language}`],
+        },
+        [h(node, 'pre', {}, [h(node, 'code', { __ignoreMap: '' }, [u('text', code)])])],
+    );
+};

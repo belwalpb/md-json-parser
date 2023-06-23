@@ -1,14 +1,21 @@
-import type { H } from 'mdast-util-to-hast'
-import { all } from 'mdast-util-to-hast'
+import type { H } from 'mdast-util-to-hast';
+import { all } from 'mdast-util-to-hast';
+import type { MdastContent } from 'mdast-util-to-hast/lib';
 
-export default function containerComponent (h: H, node: any) {
-  const hast: any = h(node, node.tagName, node.attributes, all(h, node))
+type Node = MdastContent & {
+    tagName: string;
+    attributes?: any;
+    fmAttributes?: any;
+};
 
-  // Inline attributes that passed in MDC sysntax `:component{...attributes}`
-  hast.attributes = node.attributes
+export default function containerComponent(h: H, node: Node) {
+    const hast: any = h(node, node.tagName, node.attributes, all(h, node));
 
-  // Attributes define using FrontMatter syntax and YAML format
-  hast.fmAttributes = node.fmAttributes
+    // Inline attributes that passed in MDC sysntax `:component{...attributes}`
+    hast.attributes = node.attributes;
 
-  return hast
+    // Attributes define using FrontMatter syntax and YAML format
+    hast.fmAttributes = node.fmAttributes;
+
+    return hast;
 }

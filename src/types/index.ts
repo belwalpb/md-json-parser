@@ -1,15 +1,9 @@
 export interface MarkdownPlugin extends Record<string, any> {}
 
-export interface MarkdownToHTMLOptions {
-    /**
-     * Enable/Disable MDC components.
-     */
+export interface MarkdownOptions {
     mdc: boolean;
     remarkPlugins: Record<string, false | (MarkdownPlugin & { instance: any })>;
     rehypePlugins: Record<string, false | (MarkdownPlugin & { instance: any })>;
-}
-
-export interface MarkdownOptions extends MarkdownToHTMLOptions {
     toc: {
         /**
          * Maximum heading depth to include in the table of contents.
@@ -108,6 +102,7 @@ export interface TocLink {
 }
 
 export interface Toc {
+    title: string;
     depth: number;
     searchDepth: number;
     links: TocLink[];
