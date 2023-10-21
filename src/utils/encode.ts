@@ -4,13 +4,12 @@ const defaultChars = ";/?:@&=+$,-_.!~*'()#";
 export const encode = (string: string, keepEscaped: boolean = true): string => {
     let result = '';
     const l = string.length;
-    let cache: string[];
 
     if (typeof keepEscaped === 'undefined') {
         keepEscaped = true;
     }
 
-    cache = getEncodeCache(defaultChars);
+    const cache: string[] = getEncodeCache(defaultChars);
 
     for (let i = 0; i < l; i++) {
         const code = string.charCodeAt(i);

@@ -24,12 +24,15 @@ export function compiler(this: any, _options: MarkdownOptions) {
 
         // Drop unsafe properties
         if (node.properties) {
-            node.properties = Object.entries(node.properties).reduce((acc, [key, value]) => {
-                if (isSafeAttribute(key, value)) {
-                    acc[key] = value;
-                }
-                return acc;
-            }, {} as Record<string, any>);
+            node.properties = Object.entries(node.properties).reduce(
+                (acc, [key, value]) => {
+                    if (isSafeAttribute(key, value)) {
+                        acc[key] = value;
+                    }
+                    return acc;
+                },
+                {} as Record<string, any>,
+            );
         }
 
         // Remove double dashes and trailing dash from heading ids
