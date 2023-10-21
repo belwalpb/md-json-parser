@@ -16,3 +16,6 @@ npm-debug.log*
 
 #editor configs
 .vscode
+
+# tgz file
+*tgz

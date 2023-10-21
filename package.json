@@ -1,6 +1,6 @@
 {
     "name": "md-json-parser",
-    "version": "1.0.2",
+    "version": "1.0.4",
     "description": "Markdown To JSON Parsing Library With Components Support.",
     "exports": {
         ".": {
