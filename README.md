@@ -5,10 +5,9 @@ A markdown parsing library build on the top of [unified](https://www.npmjs.com/p
 ## Feature Highlights
 
 *   [x] **Markdown to JSON Tree Conversion**
-*   [x] **Security by default (no `dangerouslySetInnerHTML` or XSS attacks)**   
-*   [x] **Fully Extentible (Using Remark and Rehype Plugins)**
+*   [x] **Fully Extentible (Using Remark Plugins)**
 *   [x] **Frontmatter Support**
-*   [x] **Table of Content (TOC) Support With Options**
+*   [x] **TODO: Table of Content (TOC) Support With Options**
 
 ## What is Markdown Parser?
 
@@ -26,7 +25,7 @@ The Package can be imported like:
 
 ### Markdown to JSON Parser:
 ```js
-import { parseMarkdownAsJson } from 'md-json-parser'
+import { MdJsonParserService } from 'md-json-parser'
 
 let markdown = `---
 file: abc.txt
@@ -36,7 +35,10 @@ creationDate: 2022-02-12
 # Heading-1
 ## Heading-2`
 
-const {data, htmlBody} = await parseMarkdownAsJson(markdown, {});
+// Optionally you can pass the changed configuration via the constructor parameters.
+const mdJsonParserService= new MdJsonParserService()
+
+const {data, body} = mdJsonParserService.parseMarkdown(markdown)
 ```
 
 <details>
@@ -52,67 +54,86 @@ const {data, htmlBody} = await parseMarkdownAsJson(markdown, {});
         "type": "root",
         "children": [
             {
-                "type": "element",
-                "tag": "h1",
-                "props": {
-                    "id": "user-content-heading-1"
-                },
+                "type": "heading",
+                "depth": 1,
                 "children": [
                     {
                         "type": "text",
-                        "value": "Heading-1"
+                        "value": "Heading-1",
+                        "position": {
+                            "start": {
+                                "line": 3,
+                                "column": 3,
+                                "offset": 8
+                            },
+                            "end": {
+                                "line": 3,
+                                "column": 12,
+                                "offset": 17
+                            }
+                        }
                     }
-                ]
+                ],
+                "position": {
+                    "start": {
+                        "line": 3,
+                        "column": 1,
+                        "offset": 6
+                    },
+                    "end": {
+                        "line": 3,
+                        "column": 12,
+                        "offset": 17
+                    }
+                }
             },
             {
-                "type": "text",
-                "value": "\n\n"
-            },
-            {
-                "type": "element",
-                "tag": "h2",
-                "props": {
-                    "id": "user-content-heading-2"
-                },
-                "children": [
-                    {
-                        "type": "text",
-                        "value": "Heading-2"
-                    }
-                ]
-            },
-            {
-                "type": "element",
-                "tag": "h3",
-                "props": {
-                    "id": "user-content-i-am-heading-3"
-                },
-                "children": [
-                    {
-                        "type": "text",
-                        "value": "I am heading-3"
-                    }
-                ]
-            }
-        ]
-    },
-    "toc": {
-        "searchDepth": 2,
-        "depth": 2,
-        "links": [
-            {
-                "id": "user-content-heading-2",
+                "type": "heading",
                 "depth": 2,
-                "text": "Heading-2",
                 "children": [
                     {
-                        "id": "user-content-i-am-heading-3",
-                        "depth": 3,
-                        "text": "I am heading-3"
+                        "type": "text",
+                        "value": "Heading-2",
+                        "position": {
+                            "start": {
+                                "line": 4,
+                                "column": 4,
+                                "offset": 22
+                            },
+                            "end": {
+                                "line": 4,
+                                "column": 13,
+                                "offset": 31
+                            }
+                        }
                     }
-                ]
+                ],
+                "position": {
+                    "start": {
+                        "line": 4,
+                        "column": 1,
+                        "offset": 19
+                    },
+                    "end": {
+                        "line": 4,
+                        "column": 13,
+                        "offset": 31
+                    }
+                }
             }
-        ]
+        ],
+        "position": {
+            "start": {
+                "line": 1,
+                "column": 1,
+                "offset": 0
+            },
+            "end": {
+                "line": 4,
+                "column": 13,
+                "offset": 31
+            }
+        }
     }
 }
 ```
@@ -122,7 +143,6 @@ const {data, htmlBody} = await parseMarkdownAsJson(markdown, {});
 ### Markdown Options:
 ```js
 {
-    mdc : true // True to support Components in Markdown. False to Disable MDC Fature.
     toc : {
         active: true // To Generate TOC or not for the provided markdown.
         depth: 2 // From h2 onwards, max tags which are supported.
@@ -130,10 +150,6 @@ const {data, htmlBody} = await parseMarkdownAsJson(markdown, {});
     },
     remarkPlugins : [
         // Array of Remark Plugins For Customization. For More Info Refer: https://github.com/remarkjs/remark/blob/main/doc/plugins.md#create-plugins
-    ],
-    rehypePlugins : [
-         // Array of Rehype Plugins For Customization. For More Info Refer: https://github.com/rehypejs/rehype/blob/main/doc/plugins.md#create-plugins
     ]
-    
 }
 ```
